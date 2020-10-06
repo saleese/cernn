@@ -12,7 +12,7 @@ from libs.interaction_trace_set import InteractionTraceSet
 
 # parser initialzation
 parser = argparse.ArgumentParser()
-parser.add_argument('--project', choices=['Platform', 'PDE', 'ECF', 'MDT'])
+parser.add_argument('--project', choices=['Mylyn', 'Platform', 'PDE', 'ECF', 'MDT'])
 parser.add_argument('--remove_dupe', action='store_true', default=False)
 parser.add_argument('--various_window', action='store_true', default=False)
 parser.add_argument('--flexible_train', action='store_true', default=False)
