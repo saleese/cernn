@@ -2,7 +2,8 @@
 Code Edit Recommendation Using a Recurrent Neural Network
 
 # Data for the Experiment
-You can download the data from http://salab.kaist.ac.kr/tse2015/AllProjects.zip
+You can download the data from http://salab.kaist.ac.kr/tse2015/AllProjects.zip. Then, please extract the data to the folder "dataset" under this project.
+
 
 # Execution for the Experiment
 You can run this source code for each project by typing the following command in your console window:
