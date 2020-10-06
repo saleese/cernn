@@ -3,9 +3,8 @@ from collections import deque
 from collections import Counter
 from itertools import repeat, chain
 
-from interaction import InteractionEvent, InteractionTrace
 from readfile import read
-from result import Result, TraceResult, TotalResult
+from mi.result import TraceResult, TotalResult
 
 # directory of interaction traces
 directory_name = 'dataset/Project_Platform/'
@@ -13,7 +12,6 @@ directory_name = 'dataset/Project_Platform/'
 # configurable context size constants
 context_size_view = 3
 context_size_edit = 1
-context_size_view_range = 100
 
 # recommendation
 def recommend():
@@ -23,24 +21,23 @@ def recommend():
     # statistics variables
     num_queries = 0
 
-    context_queue_view = deque([], context_size_view_range) # view context queue
+    context_queue_view = deque([], context_size_view) # view context queue
     context_queue_edit = deque([], context_size_edit) # edit context queue
 
     # get file list of interaction traces
     file_list = os.listdir(directory_name)
     file_list = [x for x in file_list if x[-3:] == 'xml']
-    file_list = sorted(file_list, key=lambda x: x.split('-')[2])
+    file_list = sorted(file_list)
 
     # total result
     total_result = TotalResult()
 
     # iterate all files in the directory
     for ii in range(len(file_list)):
-    #for ii in range(50):
         filename = file_list[ii]
         # get interaction trace from file
         trace = read(directory_name + filename)
-        
+
         # TEST =================================================================
 
         # initialize nth counter
@@ -60,68 +57,43 @@ def recommend():
             # recommendation list for a context
             recommendation_list = []
 
-            # used viewed context files
-            used_context_view_set = set()
-
-            # form context - if filename is already in the queue, then ignore
+            # form context
+            brecommend = False
             if event.type == 'view':
                 if not event.filename in context_queue_view:
                     context_queue_view.append(event.filename)
-
+                    brecommend = True
+            
             elif event.type == 'edit':
                 if not event.filename in context_queue_edit:
                     context_queue_edit.append(event.filename)
+                    brecommend = True
+            
+            if check_condition(context_queue_view, context_queue_edit, brecommend):
+                #print(event.filename)
+                num_queries+=1
 
-                    # EDIT POINT --> MAKE RECOMMENDATION
-                    num_queries += 1 # num_Q increment
+                for rule in mined_rules:
 
-                    # iterate rules
-                    for rule in mined_rules:
-
-                        ###############################################
-                        '''view_flag = False
-                        view_count = 0
-                        for view in context_queue_view:
-                            if view in rule.view_set:
-                                view_count += 1
-                        if view_count >= context_size_view:
-                            view_flag = True'''
-
-                        # windowed context
-                        ranged_context = []
-
-                        # check view context
-                        view_flag = True
-                        view_count = 0
-                        for view in context_queue_view:
-                            if view in rule.view_set:
-                                ranged_context.append(view)
-                                view_count += 1
-                                if view_count >= context_size_view:
-                                    view_flag = True
-                                    break
-                            else:
-                                view_flag = False
-                                break
-
-                        # check edit context
-                        edit_flag = True
-                        for edit in context_queue_edit:
-                            if not edit in rule.edit_set:
-                                edit_flag = False
-
-                        # if view & edit context matched
-                        # get recommendation list
-                        if view_flag and edit_flag:
-                            for x in rule.edit_set:
-                                if not x in context_queue_edit:
-                                    if len(rule.view_set) == 0:
-                                        print('error')
-                                        exit()
-                                    if not x in ranged_context:
-                                        recommendation_list.append(x)
-                            used_context_view_set.update(ranged_context)
-
+                    view_flag = True
+                    for view in context_queue_view:
+                        if not view in rule.view_set:
+                            view_flag = False
+                    edit_flag = True
+                    for edit in context_queue_edit:
+                        if not edit in rule.edit_set:
+                            edit_flag = False
+                    
+                    if view_flag and edit_flag:
+                        #print(rule.name)
+                        for x in rule.edit_set:
+                            if not x in context_queue_edit:
+                                if len(rule.view_set) == 0:
+                                    print('error')
+                                    exit()
+                                if not x in context_queue_view:
+                                    recommendation_list.append(x)
+            
             if len(recommendation_list) != 0:
                 # sort
                 #print(len(recommendation_list), len(set(recommendation_list)))
@@ -133,32 +105,18 @@ def recommend():
                 # top 10 list
                 recommendation_list = recommendation_list[:10]
 
-                expected_results = [x for x in trace.edit_set if not x in context_queue_edit and not x in used_context_view_set]
+                expected_results = [x for x in trace.edit_set if not x in context_queue_edit and not x in context_queue_view]
                 trace_result.add(recommendation_list, expected_results, nth_count)
                 #if len(expected_results) != 0:
                 #    trace_result.add(expected_results[:10], expected_results, nth_count)
 
+                    
         # append trace result into total result
         if len(trace_result.results) != 0:
             total_result.add(trace_result)
-    
-                        ###############################################
 
 
-                
-
-
-
-
-
-        # TEST END =============================================================
-
-        # TRAIN ================================================================
-
-        # put trace into list
         mined_rules.append(trace)
-
-        # TRAIN END ============================================================
 
 
     (precision, recall, fmeasure) = total_result.statistics()
@@ -175,20 +133,11 @@ def recommend():
 
     print('================================')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+            
+def check_condition(cqv, cqe, b):
+    if len(cqv) >= context_size_view and len(cqe) >= context_size_edit and b:
+        return True
+    return False
 
 if __name__ == '__main__':
     recommend()
-

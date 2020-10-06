@@ -3,9 +3,8 @@ from collections import deque
 from collections import Counter
 from itertools import repeat, chain
 
-from interaction import InteractionEvent, InteractionTrace
 from readfile import read
-from result import Result, TraceResult, TotalResult
+from mi.result import TraceResult, TotalResult
 
 # directory of interaction traces
 directory_name = 'dataset/Project_ECF/'
