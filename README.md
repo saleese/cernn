@@ -1,4 +1,4 @@
-# cernn
+# CERNN
 Code Edit Recommendation Using a Recurrent Neural Network
 
 # Data for the Experiment
