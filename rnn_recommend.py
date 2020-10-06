@@ -2,15 +2,13 @@ import numpy as np
 import argparse
 from time import time
 
-from keras import backend as K
 from keras.models import Sequential
-from keras.layers import Dense, Embedding, LSTM, Dropout
-from keras.callbacks import EarlyStopping
+from keras.layers import Embedding, LSTM
 from keras.utils import to_categorical
 from keras.preprocessing import sequence
 
-from utils import make_dataset, integer_encode, integer_encode_without_zero_index
-from interaction_trace_set import InteractionTraceSet
+from libs.utils import make_dataset, integer_encode, integer_encode_without_zero_index
+from libs.interaction_trace_set import InteractionTraceSet
 
 # parser initialzation
 parser = argparse.ArgumentParser()

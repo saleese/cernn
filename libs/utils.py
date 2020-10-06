@@ -83,9 +83,8 @@ def make_dataset(kind, trace, file_index, category, window_size, step, lookup, o
 
 if __name__ == '__main__':
     import numpy as np
-    from keras.utils import to_categorical
     from keras.preprocessing import sequence
-    from interaction_trace_set import InteractionTraceSet
+    from libs.interaction_trace_set import InteractionTraceSet
 
     # directory of interaction traces
     directory_name = 'dataset/Project_ECF/'

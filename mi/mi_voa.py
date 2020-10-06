@@ -3,7 +3,7 @@ from collections import deque
 from collections import Counter
 from itertools import repeat, chain
 
-from readfile import read
+from libs.readfile import read
 from mi.result import TraceResult, TotalResult
 
 # directory of interaction traces

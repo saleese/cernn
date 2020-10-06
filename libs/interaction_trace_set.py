@@ -1,5 +1,5 @@
 import os
-from readfile import read
+from libs.readfile import read
 
 # interaction trace set
 class InteractionTraceSet:
