@@ -205,6 +205,10 @@ def run():
                 recommend_set.clear()
                 answer_set.clear()
 
+            # This code is to remove a model from the memory
+            K.clear_session() # added by saleese, Oct. 07, 2020
+            del model # added by saleese, Oct. 07, 2020
+
         # print intermediate result
         num_queries += len(x_test_list)
         print(' Queries:', num_queries)
@@ -214,10 +218,6 @@ def run():
             print(' Precision: {0:.4f}'.format(sum(precision_list) / len(precision_list)))
             print(' Recall: {0:.4f}'.format(sum(recall_list) / len(recall_list)))
             print(' Feedback: {0:.4f}'.format(num_recommendations / num_queries))
-
-        # This code is to remove a model from the memory
-        K.clear_session() # added by saleese, Oct. 07, 2020
-        del model # added by saleese, Oct. 07, 2020
 
     # record end time
     end_time = time()
