@@ -2,15 +2,15 @@ import numpy as np
 import argparse
 from time import time
 
-from keras.models import Sequential
-from keras.layers import Embedding, LSTM
-from keras.utils import to_categorical
-from keras.preprocessing import sequence
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.preprocessing import sequence
 
 from libs.utils import make_dataset, integer_encode, integer_encode_without_zero_index
 from libs.interaction_trace_set import InteractionTraceSet
 
-from keras import backend as K # added by saleese, Oct. 07, 2020
+from tensorflow.keras import backend as K # added by saleese, Oct. 07, 2020
 
 # parser initialzation
 parser = argparse.ArgumentParser()
