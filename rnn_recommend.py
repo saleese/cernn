@@ -11,25 +11,30 @@ from tensorflow.keras import backend as K # added by saleese, Oct. 07, 2020
 from libs.utils import make_dataset, integer_encode, integer_encode_without_zero_index
 from libs.interaction_trace_set import InteractionTraceSet
 
-# parser initialzation
-parser = argparse.ArgumentParser()
-parser.add_argument('--project', choices=['Mylyn', 'Platform', 'PDE', 'ECF', 'MDT'])
-parser.add_argument('--remove_dupe', action='store_true', default=False)
-parser.add_argument('--various_window', action='store_true', default=False)
-parser.add_argument('--flexible_train', action='store_true', default=False)
-parser.add_argument('--flexible_test', action='store_true', default=False)
-parser.add_argument('--oversampling', type=int, default=0)
-parser.add_argument('--window_size', type=int, default=4)
-parser.add_argument('--step', type=int, default=10)
-parser.add_argument('--lookup', type=int, default=1000)
-parser.add_argument('--embedding_size', type=int, default=512)
-parser.add_argument('--lstm_memory_cells', type=int, default=256)
-parser.add_argument('--lstm_dropout', type=float, default=0)
-parser.add_argument('--lstm_recurrent_dropout', type=float, default=0)
-parser.add_argument('--batch_size', type=int, default=32)
-parser.add_argument('--epochs', type=int, default=100)
-parser.add_argument('--threshold', type=float, default=0.5)
-parser.add_argument('--top_k', type=int, default=10, choices=range(1,11))
+# parser initialization
+def add_argments2parser():
+    # parser initialization
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--project', choices=['Mylyn', 'Platform', 'PDE', 'ECF', 'MDT'])
+    parser.add_argument('--remove_dupe', action='store_true', default=False)
+    parser.add_argument('--various_window', action='store_true', default=False)
+    parser.add_argument('--flexible_train', action='store_true', default=False)
+    parser.add_argument('--flexible_test', action='store_true', default=False)
+    parser.add_argument('--oversampling', type=int, default=0)
+    parser.add_argument('--window_size', type=int, default=4)
+    parser.add_argument('--step', type=int, default=10)
+    parser.add_argument('--lookup', type=int, default=1000)
+    parser.add_argument('--embedding_size', type=int, default=512)
+    parser.add_argument('--lstm_memory_cells', type=int, default=256)
+    parser.add_argument('--lstm_dropout', type=float, default=0)
+    parser.add_argument('--lstm_recurrent_dropout', type=float, default=0)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--epochs', type=int, default=100)
+    parser.add_argument('--threshold', type=float, default=0.5)
+    parser.add_argument('--top_k', type=int, default=10, choices=range(1, 11))
+    return parser
+
+parser = add_argments2parser()
 args = parser.parse_args()
 
 # project directory
@@ -57,7 +62,6 @@ threshold = args.threshold
 top_k = args.top_k
 
 def run():
-
     # create interaction trace set
     interaction_trace_set = InteractionTraceSet(directory_name)
 
@@ -250,7 +254,6 @@ def run():
     print(' Parameters')
     print(vars(args))
     print('==================================')
-
 
 if __name__ == '__main__':
     run()
