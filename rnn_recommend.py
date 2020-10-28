@@ -9,7 +9,7 @@ from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras import backend as K # added by saleese, Oct. 07, 2020
 
 from libs.utils import make_dataset, integer_encode, integer_encode_without_zero_index
-from libs.interaction_trace_set import InteractionTraceSet
+from libs.interaction_traces import InteractionTraces
 
 # parser initialization
 def add_argments2parser():
@@ -63,20 +63,20 @@ top_k = args.top_k
 
 def run():
     # create interaction trace set
-    interaction_trace_set = InteractionTraceSet(directory_name)
+    interaction_traces = InteractionTraces(directory_name)
 
     # the number of learning
-    iterations = len(interaction_trace_set.interaction_trace_set)
+    iterations = len(interaction_traces.interaction_trace_set)
 
     # file index
-    file_index = integer_encode_without_zero_index(interaction_trace_set.event_set)
+    file_index = integer_encode_without_zero_index(interaction_traces.event_set)
     num_file = len(file_index) + 1
     
     # category
-    category = integer_encode(interaction_trace_set.edit_set)
+    category = integer_encode(interaction_traces.edit_set)
     
     # the number of categories (size of unique edit events)
-    num_category = len(interaction_trace_set.edit_set)
+    num_category = len(interaction_traces.edit_set)
     
     # the number of queries
     num_queries = 0
@@ -100,8 +100,8 @@ def run():
     for iteration in range(1, iterations):
 
         # get traces for training and test
-        trace_train = interaction_trace_set.interaction_trace_set[iteration-1]
-        trace_test = interaction_trace_set.interaction_trace_set[iteration]
+        trace_train = interaction_traces.interaction_trace_set[iteration-1]
+        trace_test = interaction_traces.interaction_trace_set[iteration]
 
         # load dataset
         x_train_list_temp, y_train_list_temp = make_dataset('train', trace_train, file_index, category,
