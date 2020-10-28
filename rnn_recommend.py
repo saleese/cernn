@@ -74,14 +74,12 @@ def run():
     iterations = len(interaction_traces.interaction_trace_set)
 
     # file index
-    file_index = integer_encode_without_zero_index(interaction_traces.event_set)
-    num_file = len(file_index) + 1
+    file_indexes = integer_encode_without_zero_index(interaction_traces.event_set)
+    num_files = len(file_indexes) + 1
     
-    # category_index
-    category_index = integer_encode(interaction_traces.edit_set)
-    
-    # the number of categories (size of unique edit events)
-    num_category = len(interaction_traces.edit_set)
+    # category_indexes and the number of categories (size of unique edit events)
+    category_indexes = integer_encode(interaction_traces.edit_set)
+    num_categories = len(category_indexes)
     
     # the number of queries
     num_queries = 0
@@ -93,8 +91,8 @@ def run():
     # to calculate precision and recall of a whole project
     precision_list, recall_list = [], []
 
-    print('the number of files is', num_file)
-    print('the number of categories is', num_category)
+    print('the number of files is', num_files)
+    print('the number of categories is', num_categories)
 
     is_init = True
 
@@ -109,13 +107,13 @@ def run():
         trace_test = interaction_traces.interaction_trace_set[iteration]
 
         # load dataset
-        x_train_list_temp, y_train_list_temp = make_dataset('train', trace_train, file_index, category_index,
+        x_train_list_temp, y_train_list_temp = make_dataset('train', trace_train, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
                                                             oversampling=oversmapling,
                                                             is_various_window=is_various_window,
                                                             is_flexible=is_flexible_train,
                                                             is_remove_dupe=is_remove_dupe)
-        x_test_list, y_test_list = make_dataset('test', trace_test, file_index, category_index,
+        x_test_list, y_test_list = make_dataset('test', trace_test, file_indexes, category_indexes,
                                                 window_size=window_size, step=n_step, lookup=n_lookup,
                                                 is_flexible=is_flexible_test,
                                                 is_remove_dupe=is_remove_dupe)
@@ -125,7 +123,7 @@ def run():
         # make train set for multi labels
         if y_train_list_temp:
             temp = [np.array(x) for x in y_train_list_temp]
-            temp = [to_categorical(x, num_category) for x in temp]
+            temp = [to_categorical(x, num_categories) for x in temp]
             temp = np.array([x.sum(axis=0) for x in temp])
 
             if is_init:
@@ -149,19 +147,19 @@ def run():
 
             # create a model
             model = Sequential()
-            model.add(Embedding(num_file,
+            model.add(Embedding(num_files,
                                 embedding_size,
-                                # num_category,
+                                # num_categories,
                                 # embeddings_initializer='glorot_uniform',
                                 embeddings_initializer='random_uniform',
                                 mask_zero=True,
                                 input_length=window_size))
             # model.add(LSTM(lstm_memory_cells, return_sequences=True, dropout=lstm_dropout))
             # model.add(LSTM(lstm_memory_cells, dropout=lstm_dropout))
-            model.add(LSTM(num_category, activation='sigmoid'))
-            # model.add(LSTM(num_category, dropout=lstm_dropout, activation='sigmoid'))
-            # model.add(Dense(num_category, activation='sigmoid'))
-            # model.add(Dense(num_category, activation='softmax'))
+            model.add(LSTM(num_categories, activation='sigmoid'))
+            # model.add(LSTM(num_categories, dropout=lstm_dropout, activation='sigmoid'))
+            # model.add(Dense(num_categories, activation='sigmoid'))
+            # model.add(Dense(num_categories, activation='softmax'))
             # print(model.summary())
 
             # model setting
