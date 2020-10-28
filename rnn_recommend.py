@@ -8,8 +8,8 @@ from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras import backend as K # added by saleese, Oct. 07, 2020
 
-from libs.utils import make_dataset, integer_encode, integer_encode_without_zero_index
 from libs.interaction_traces import InteractionTraces
+from libs.utils import make_dataset, integer_encode, integer_encode_without_zero_index
 
 # parser initialization
 def add_argments2parser():
@@ -35,7 +35,12 @@ def add_argments2parser():
     return parser
 
 parser = add_argments2parser()
+# for a normal run
 args = parser.parse_args()
+# for a test
+#args = parser.parse_args(
+#    ["--project", "MDT", "--window_size", "3", "--step", "10", "--lookup", "1000", "--batch_size", "32",
+#     "--epochs", "500", "--threshold", "0.91", "--remove_dupe"])
 
 # project directory
 directory_name = 'dataset/Project_{0}/'.format(args.project)
@@ -72,8 +77,8 @@ def run():
     file_index = integer_encode_without_zero_index(interaction_traces.event_set)
     num_file = len(file_index) + 1
     
-    # category
-    category = integer_encode(interaction_traces.edit_set)
+    # category_index
+    category_index = integer_encode(interaction_traces.edit_set)
     
     # the number of categories (size of unique edit events)
     num_category = len(interaction_traces.edit_set)
@@ -104,13 +109,13 @@ def run():
         trace_test = interaction_traces.interaction_trace_set[iteration]
 
         # load dataset
-        x_train_list_temp, y_train_list_temp = make_dataset('train', trace_train, file_index, category,
+        x_train_list_temp, y_train_list_temp = make_dataset('train', trace_train, file_index, category_index,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
                                                             oversampling=oversmapling,
                                                             is_various_window=is_various_window,
                                                             is_flexible=is_flexible_train,
                                                             is_remove_dupe=is_remove_dupe)
-        x_test_list, y_test_list = make_dataset('test', trace_test, file_index, category,
+        x_test_list, y_test_list = make_dataset('test', trace_test, file_index, category_index,
                                                 window_size=window_size, step=n_step, lookup=n_lookup,
                                                 is_flexible=is_flexible_test,
                                                 is_remove_dupe=is_remove_dupe)
