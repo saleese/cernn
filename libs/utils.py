@@ -9,7 +9,7 @@ def integer_encode_without_zero_index(mylist):
 def get_key_from_value(mydict, myvalue):
     return [k for k, v in mydict.items() if v == myvalue]
 
-def make_dataset(kind, trace, file_index, category, window_size, step, lookup, oversampling=0, is_various_window=False, is_flexible=False, is_remove_dupe=False):
+def make_dataset(kind, trace, file_indexes, category_indexes, window_size, step, lookup, oversampling=0, is_various_window=False, is_flexible=False, is_remove_dupe=False):
     if is_remove_dupe:
         event_tuple_list = trace.event_tuple_list_groupby
     else:        
@@ -25,14 +25,14 @@ def make_dataset(kind, trace, file_index, category, window_size, step, lookup, o
 
             if is_flexible:
                 # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x[1] not in list(map(lambda x: x[1], context))]
-                recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x not in context]
+                recommend = [category_indexes[x[1]] for x in event_tuple_list[(i + window_size):(i + window_size + lookup)] if x[0] is 'edit' and x not in context]
                 # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x != context[-1]]
                 # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit']
             else:
                 if context[-1][0] == 'edit':
                     # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x[1] not in list(map(lambda x: x[1], context))]
                     # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x not in context]
-                    recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x != context[-1]]
+                    recommend = [category_indexes[x[1]] for x in event_tuple_list[(i + window_size):(i + window_size + lookup)] if x[0] is 'edit' and x != context[-1]]
                     # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit']
 
             if recommend:
@@ -40,14 +40,14 @@ def make_dataset(kind, trace, file_index, category, window_size, step, lookup, o
 
                 if is_various_window:
                     for ii in range(window_size):
-                        contexts_list.append([file_index[x] for x in context[ii:]])
+                        contexts_list.append([file_indexes[x] for x in context[ii:]])
                         output.append(recommend)
                 elif oversampling:
                     for ii in range(oversampling):
-                        contexts_list.append([file_index[x] for x in context])
+                        contexts_list.append([file_indexes[x] for x in context])
                         output.append(recommend)
                 else:
-                    contexts_list.append([file_index[x] for x in context])
+                    contexts_list.append([file_indexes[x] for x in context])
                     output.append(recommend)
     else:
         for i in range(len(event_tuple_list)-window_size):
@@ -56,20 +56,20 @@ def make_dataset(kind, trace, file_index, category, window_size, step, lookup, o
 
             if is_flexible:
                 # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x[1] not in list(map(lambda x: x[1], context))]
-                recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x not in context]
+                recommend = [category_indexes[x[1]] for x in event_tuple_list[(i + window_size):(i + window_size + lookup)] if x[0] is 'edit' and x not in context]
                 # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x != context[-1]]
                 # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit']
                 recommend = list(OrderedDict.fromkeys([x for x in recommend]))[:step]
                 output.append(recommend)
-                contexts_list.append([file_index[x] for x in context])
+                contexts_list.append([file_indexes[x] for x in context])
             else:
                 if context[-1][0] == 'edit':
                     recommend_candidates = [x for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit']
                     if recommend_candidates:
-                        recommend = [category[x[1]] for x in recommend_candidates if x != context[-1]]
+                        recommend = [category_indexes[x[1]] for x in recommend_candidates if x != context[-1]]
                         recommend = list(OrderedDict.fromkeys([x for x in recommend]))[:step]
                         output.append(recommend)
-                        contexts_list.append([file_index[x] for x in context])
+                        contexts_list.append([file_indexes[x] for x in context])
                     # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x[1] not in list(map(lambda x: x[1], context))]
                     # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x not in context]
                     # recommend = [category[x[1]] for x in event_tuple_list[(i+window_size):(i+window_size+lookup)] if x[0] is 'edit' and x != context[-1]]
@@ -84,11 +84,11 @@ def make_dataset(kind, trace, file_index, category, window_size, step, lookup, o
 if __name__ == '__main__':
     import numpy as np
     from keras.preprocessing import sequence
-    from libs.interaction_trace_set import InteractionTraceSet
+    from libs.interaction_traces import InteractionTraces
 
     # directory of interaction traces
     directory_name = 'dataset/Project_ECF/'
-    interaction_trace_set = InteractionTraceSet(directory_name)
+    interaction_trace_set = InteractionTraces(directory_name)
 
     # file index
     idx = integer_encode_without_zero_index(interaction_trace_set.event_set)

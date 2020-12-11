@@ -32,6 +32,7 @@ def add_argments2parser():
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--threshold', type=float, default=0.5)
     parser.add_argument('--top_k', type=int, default=10, choices=range(1, 11))
+    parser.add_argument('--start_trace_num', type=int, default=1)
     return parser
 
 parser = add_argments2parser()
@@ -65,6 +66,7 @@ train_batch_size = args.batch_size
 epochs = args.epochs
 threshold = args.threshold
 top_k = args.top_k
+start_trace_num = args.start_trace_num
 
 def run():
     # create interaction trace set
@@ -102,18 +104,18 @@ def run():
     # online learning
     for iteration in range(1, iterations):
 
-        # get traces for training and test
-        trace_train = interaction_traces.interaction_trace_set[iteration-1]
-        trace_test = interaction_traces.interaction_trace_set[iteration]
+        # get each trace for training and test, respectively
+        train_trace = interaction_traces.interaction_trace_set[iteration-1]
+        test_trace = interaction_traces.interaction_trace_set[iteration]
 
         # load dataset
-        x_train_list_temp, y_train_list_temp = make_dataset('train', trace_train, file_indexes, category_indexes,
+        x_train_list_temp, y_train_list_temp = make_dataset('train', train_trace, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
                                                             oversampling=oversmapling,
                                                             is_various_window=is_various_window,
                                                             is_flexible=is_flexible_train,
                                                             is_remove_dupe=is_remove_dupe)
-        x_test_list, y_test_list = make_dataset('test', trace_test, file_indexes, category_indexes,
+        x_test_list, y_test_list = make_dataset('test', test_trace, file_indexes, category_indexes,
                                                 window_size=window_size, step=n_step, lookup=n_lookup,
                                                 is_flexible=is_flexible_test,
                                                 is_remove_dupe=is_remove_dupe)

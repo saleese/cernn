@@ -131,3 +131,6 @@ dmypy.json
 # datafiles
 dataset/
 .xml
+
+# jupyter notebook
+.ipynb

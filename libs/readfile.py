@@ -1,6 +1,7 @@
 from xml.etree.ElementTree import parse
 
-from libs.interaction import InteractionEvent, InteractionTrace
+from libs.interaction_event import InteractionEvent
+from libs.interaction_trace import InteractionTrace
 
 # read xml file and return InteractionTrace object
 def read(filename):

@@ -2,7 +2,7 @@ import os
 from libs.readfile import read
 
 # interaction trace set
-class InteractionTraceSet:
+class InteractionTraces:
     def __init__(self, directory_name):
         self.directory_name = directory_name
         self.interaction_trace_set = []
