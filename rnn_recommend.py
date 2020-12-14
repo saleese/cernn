@@ -35,6 +35,19 @@ def add_argments2parser():
     parser.add_argument('--start_trace_num', type=int, default=1)
     return parser
 
+def create_ytrain(y_train_list_temp, num_categories, is_init, y_train):
+    if y_train_list_temp:
+        temp = [np.array(x) for x in y_train_list_temp]
+        temp = [to_categorical(x, num_categories) for x in temp]
+        temp = np.array([x.sum(axis=0) for x in temp])
+
+        if is_init:
+            y_train = np.copy(temp)
+            is_init = False
+        else:
+            y_train = np.vstack((y_train, temp))
+    return is_init, y_train
+
 def create_model(num_files, num_categories):
     model = Sequential()
     model.add(Embedding(num_files,
@@ -165,17 +178,16 @@ def run():
     print('the number of categories is', num_categories)
 
     is_init = True
+    y_train = None
 
     # record start time
     start_time = time()
 
-    # online learning
-    for iteration in range(1, iterations):
-
+    # prepare the pre-data
+    for iteration in range(1, start_trace_num):
         # get each trace for training and test, respectively
-        train_trace = interaction_traces.interaction_trace_set[iteration-1]
+        train_trace = interaction_traces.interaction_trace_set[iteration - 1]
         test_trace = interaction_traces.interaction_trace_set[iteration]
-
         # load dataset
         x_train_list_temp, y_train_list_temp = make_dataset('train', train_trace, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
@@ -187,20 +199,34 @@ def run():
                                                 window_size=window_size, step=n_step, lookup=n_lookup,
                                                 is_flexible=is_flexible_test,
                                                 is_remove_dupe=is_remove_dupe)
-
         x_train_list += x_train_list_temp
-        
-        # make train set for multi labels
-        if y_train_list_temp:
-            temp = [np.array(x) for x in y_train_list_temp]
-            temp = [to_categorical(x, num_categories) for x in temp]
-            temp = np.array([x.sum(axis=0) for x in temp])
 
-            if is_init:
-                y_train = np.copy(temp)
-                is_init = False
-            else:
-                y_train = np.vstack((y_train, temp))
+        # make train set for multi labels
+        is_init, y_train = create_ytrain(y_train_list_temp, num_categories, is_init, y_train)
+
+        print('----------------------------------')
+        print(' {0}th iteration'.format(iteration))
+
+    # online learning
+    for iteration in range(start_trace_num, iterations):
+        # get each trace for training and test, respectively
+        train_trace = interaction_traces.interaction_trace_set[iteration-1]
+        test_trace = interaction_traces.interaction_trace_set[iteration]
+        # load dataset
+        x_train_list_temp, y_train_list_temp = make_dataset('train', train_trace, file_indexes, category_indexes,
+                                                            window_size=window_size, step=n_step, lookup=n_lookup,
+                                                            oversampling=oversmapling,
+                                                            is_various_window=is_various_window,
+                                                            is_flexible=is_flexible_train,
+                                                            is_remove_dupe=is_remove_dupe)
+        x_test_list, y_test_list = make_dataset('test', test_trace, file_indexes, category_indexes,
+                                                window_size=window_size, step=n_step, lookup=n_lookup,
+                                                is_flexible=is_flexible_test,
+                                                is_remove_dupe=is_remove_dupe)
+        x_train_list += x_train_list_temp
+
+        # make train set for multi labels
+        is_init, y_train = create_ytrain(y_train_list_temp, num_categories, is_init, y_train)
 
         print('----------------------------------')
         print(' {0}th iteration'.format(iteration))
