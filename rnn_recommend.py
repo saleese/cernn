@@ -35,6 +35,74 @@ def add_argments2parser():
     parser.add_argument('--start_trace_num', type=int, default=1)
     return parser
 
+def create_model(num_files, num_categories):
+    model = Sequential()
+    model.add(Embedding(num_files,
+                        embedding_size,
+                        # num_categories,
+                        # embeddings_initializer='glorot_uniform',
+                        embeddings_initializer='random_uniform',
+                        mask_zero=True,
+                        input_length=window_size))
+    # model.add(LSTM(lstm_memory_cells, return_sequences=True, dropout=lstm_dropout))
+    # model.add(LSTM(lstm_memory_cells, dropout=lstm_dropout))
+    model.add(LSTM(num_categories, activation='sigmoid'))
+    # model.add(LSTM(num_categories, dropout=lstm_dropout, activation='sigmoid'))
+    # model.add(Dense(num_categories, activation='sigmoid'))
+    # model.add(Dense(num_categories, activation='softmax'))
+    # print(model.summary())
+
+    # model setting
+    model.compile(loss='binary_crossentropy',
+                  # loss='categorical_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
+    return model
+
+def print_intermediate_result(precision_list, recall_list, num_queries, num_recommendations):
+    print(' Queries:', num_queries)
+    print(' Recommendations:', num_recommendations)
+
+    if precision_list:
+        print(' Precision: {0:.4f}'.format(sum(precision_list) / len(precision_list)))
+        print(' Recall: {0:.4f}'.format(sum(recall_list) / len(recall_list)))
+        print(' Feedback: {0:.4f}'.format(num_recommendations / num_queries))
+        # logFile = open("log.txt", "a+")
+        # logFile.write('{0:.4f}'.format(sum(precision_list) / len(precision_list)) + ", " + '{0:.4f}'.format(sum(recall_list) / len(recall_list)) + "\n")
+        # logFile.close()
+
+def print_final_result(precision_list, recall_list, num_queries, num_recommendations):
+    # final result
+    total_precision = total_recall = f_measure = 0.0
+
+    if precision_list:
+        total_precision = sum(precision_list) / len(precision_list)
+        total_recall = sum(recall_list) / len(recall_list)
+
+    if total_precision + total_recall:
+        f_measure = (2 * total_precision * total_recall) / (total_precision + total_recall)
+
+    print('==================================')
+    print(' Final Result')
+    print('==================================')
+    print(' Precision: {0:.4f}'.format(total_precision))
+    print(' Recall: {0:.4f}'.format(total_recall))
+    print(' F-measure: {0:.4f}'.format(f_measure))
+    print(' Feedback: {0:.4f}'.format(num_recommendations / num_queries))
+    print(' Recommendations:', num_recommendations)
+    print('==================================')
+    print(' Parameters')
+    print(vars(args))
+    print('==================================')
+
+def print_time(start_time, end_time):
+    # transform seconds to h:mm:ss
+    m, s = divmod(int(end_time - start_time), 60)
+    h, m = divmod(m, 60)
+
+    print('==================================')
+    print(' Execution Time: {0}h {1:02d}m {2:02d}s'.format(h, m, s))
+
 parser = add_argments2parser()
 # for a normal run
 args = parser.parse_args()
@@ -148,27 +216,7 @@ def run():
                 # x_test = sequence.pad_sequences(x_test_list, maxlen=window_size)
 
             # create a model
-            model = Sequential()
-            model.add(Embedding(num_files,
-                                embedding_size,
-                                # num_categories,
-                                # embeddings_initializer='glorot_uniform',
-                                embeddings_initializer='random_uniform',
-                                mask_zero=True,
-                                input_length=window_size))
-            # model.add(LSTM(lstm_memory_cells, return_sequences=True, dropout=lstm_dropout))
-            # model.add(LSTM(lstm_memory_cells, dropout=lstm_dropout))
-            model.add(LSTM(num_categories, activation='sigmoid'))
-            # model.add(LSTM(num_categories, dropout=lstm_dropout, activation='sigmoid'))
-            # model.add(Dense(num_categories, activation='sigmoid'))
-            # model.add(Dense(num_categories, activation='softmax'))
-            # print(model.summary())
-
-            # model setting
-            model.compile(loss ='binary_crossentropy',
-                          # loss='categorical_crossentropy',
-                          optimizer='adam',
-                          metrics=['accuracy'])
+            model = create_model(num_files, num_categories)
 
             # model learning (verbose: 0 = silent, 1 = progress bar, 2 = one line per epoch.)
             model.fit(x_train, y_train, batch_size=train_batch_size, epochs=epochs, verbose=0)
@@ -219,46 +267,13 @@ def run():
 
         # print intermediate result
         num_queries += len(x_test_list)
-        print(' Queries:', num_queries)
-        print(' Recommendations:', num_recommendations)
-
-        if precision_list:
-            print(' Precision: {0:.4f}'.format(sum(precision_list) / len(precision_list)))
-            print(' Recall: {0:.4f}'.format(sum(recall_list) / len(recall_list)))
-            print(' Feedback: {0:.4f}'.format(num_recommendations / num_queries))
+        print_intermediate_result(precision_list, recall_list, num_queries, num_recommendations)
 
     # record end time
     end_time = time()
 
-    # transform seconds to h:mm:ss
-    m, s = divmod(int(end_time - start_time), 60)
-    h, m = divmod(m, 60)
-    
-    print('==================================')
-    print(' Execution Time: {0}h {1:02d}m {2:02d}s'.format(h, m, s))
-
-    # final result
-    total_precision = total_recall = f_measure = 0.0
-
-    if precision_list:
-        total_precision = sum(precision_list) / len(precision_list)
-        total_recall = sum(recall_list) / len(recall_list)
-
-    if total_precision + total_recall:
-        f_measure = (2 * total_precision * total_recall) / (total_precision + total_recall)
-
-    print('==================================')
-    print(' Final Result')
-    print('==================================')
-    print(' Precision: {0:.4f}'.format(total_precision))
-    print(' Recall: {0:.4f}'.format(total_recall))
-    print(' F-measure: {0:.4f}'.format(f_measure))
-    print(' Feedback: {0:.4f}'.format(num_recommendations / num_queries))
-    print(' Recommendations:', num_recommendations)
-    print('==================================')
-    print(' Parameters')
-    print(vars(args))
-    print('==================================')
+    print_time(start_time, end_time)
+    print_final_result(precision_list, recall_list, num_queries, num_recommendations)
 
 if __name__ == '__main__':
     run()
