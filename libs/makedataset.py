@@ -33,11 +33,11 @@ def make_dataset(kind, trace, file_indexes, category_indexes, window_size, step,
                 recommend = list(OrderedDict.fromkeys([x for x in recommend]))[:step]
 
                 if is_various_window:
-                    for ii in range(window_size):
-                        contexts_list.append([file_indexes[x] for x in context[ii:]])
+                    for j in range(window_size):
+                        contexts_list.append([file_indexes[x] for x in context[j:]])
                         output.append(recommend)
                 elif oversampling:
-                    for ii in range(oversampling):
+                    for j in range(oversampling):
                         contexts_list.append([file_indexes[x] for x in context])
                         output.append(recommend)
                 else:

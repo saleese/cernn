@@ -211,11 +211,9 @@ def run():
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
                                                             oversampling=oversampling,
                                                             is_various_window=is_various_window,
-                                                            is_flexible=is_flexible_train,
                                                             is_remove_dupe=is_remove_dupe)
         x_test_list, y_test_list = make_dataset('test', test_trace, file_indexes, category_indexes,
                                                 window_size=window_size, step=n_step, lookup=n_lookup,
-                                                is_flexible=is_flexible_test,
                                                 is_remove_dupe=is_remove_dupe)
         x_train_list += x_train_list_temp
 
