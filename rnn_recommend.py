@@ -18,8 +18,6 @@ def add_argments2parser():
     parser.add_argument('--project', choices=['Mylyn', 'Platform', 'PDE', 'ECF', 'MDT'])
     parser.add_argument('--remove_dupe', action='store_true', default=False)
     parser.add_argument('--various_window', action='store_true', default=False)
-    parser.add_argument('--flexible_train', action='store_true', default=False)
-    parser.add_argument('--flexible_test', action='store_true', default=False)
     parser.add_argument('--oversampling', type=int, default=0)
     parser.add_argument('--window_size', type=int, default=4)
     parser.add_argument('--step', type=int, default=10)
@@ -129,9 +127,7 @@ directory_name = 'dataset/Project_{0}/'.format(args.project)
 
 # kind of model
 is_various_window = args.various_window
-is_flexible_train = args.flexible_train
-is_flexible_test = args.flexible_test
-oversmapling = args.oversampling
+oversampling = args.oversampling
 
 # remove redundant events in a trace (AAAABBBCCDAABBB -> ABCDAB)
 is_remove_dupe = args.remove_dupe
@@ -191,13 +187,11 @@ def run():
         # load dataset
         x_train_list_temp, y_train_list_temp = make_dataset('train', train_trace, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
-                                                            oversampling=oversmapling,
+                                                            oversampling=oversampling,
                                                             is_various_window=is_various_window,
-                                                            is_flexible=is_flexible_train,
                                                             is_remove_dupe=is_remove_dupe)
         x_test_list, y_test_list = make_dataset('test', test_trace, file_indexes, category_indexes,
                                                 window_size=window_size, step=n_step, lookup=n_lookup,
-                                                is_flexible=is_flexible_test,
                                                 is_remove_dupe=is_remove_dupe)
         x_train_list += x_train_list_temp
 
@@ -215,7 +209,7 @@ def run():
         # load dataset
         x_train_list_temp, y_train_list_temp = make_dataset('train', train_trace, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
-                                                            oversampling=oversmapling,
+                                                            oversampling=oversampling,
                                                             is_various_window=is_various_window,
                                                             is_flexible=is_flexible_train,
                                                             is_remove_dupe=is_remove_dupe)
