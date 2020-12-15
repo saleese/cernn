@@ -9,7 +9,7 @@ from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras import backend as K # added by saleese, Oct. 07, 2020
 
 from libs.interaction_traces import InteractionTraces
-from libs.utils import make_dataset, integer_encode, integer_encode_without_zero_index
+from libs.makedataset import make_dataset, integer_encode, integer_encode_without_zero_index
 
 # parser initialization
 def add_argments2parser():
@@ -17,8 +17,6 @@ def add_argments2parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--project', choices=['Mylyn', 'Platform', 'PDE', 'ECF', 'MDT'])
     parser.add_argument('--remove_dupe', action='store_true', default=False)
-    parser.add_argument('--various_window', action='store_true', default=False)
-    parser.add_argument('--oversampling', type=int, default=0)
     parser.add_argument('--window_size', type=int, default=4)
     parser.add_argument('--step', type=int, default=10)
     parser.add_argument('--lookup', type=int, default=1000)
@@ -125,10 +123,6 @@ args = parser.parse_args()
 # project directory
 directory_name = 'dataset/Project_{0}/'.format(args.project)
 
-# kind of model
-is_various_window = args.various_window
-oversampling = args.oversampling
-
 # remove redundant events in a trace (AAAABBBCCDAABBB -> ABCDAB)
 is_remove_dupe = args.remove_dupe
 
@@ -183,16 +177,10 @@ def run():
     for iteration in range(1, start_trace_num):
         # get each trace for training and test, respectively
         train_trace = interaction_traces.interaction_trace_set[iteration - 1]
-        test_trace = interaction_traces.interaction_trace_set[iteration]
         # load dataset
-        x_train_list_temp, y_train_list_temp = make_dataset('train', train_trace, file_indexes, category_indexes,
+        x_train_list_temp, y_train_list_temp = make_dataset(train_trace, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
-                                                            oversampling=oversampling,
-                                                            is_various_window=is_various_window,
                                                             is_remove_dupe=is_remove_dupe)
-        x_test_list, y_test_list = make_dataset('test', test_trace, file_indexes, category_indexes,
-                                                window_size=window_size, step=n_step, lookup=n_lookup,
-                                                is_remove_dupe=is_remove_dupe)
         x_train_list += x_train_list_temp
 
         # make train set for multi labels
@@ -207,12 +195,10 @@ def run():
         train_trace = interaction_traces.interaction_trace_set[iteration-1]
         test_trace = interaction_traces.interaction_trace_set[iteration]
         # load dataset
-        x_train_list_temp, y_train_list_temp = make_dataset('train', train_trace, file_indexes, category_indexes,
+        x_train_list_temp, y_train_list_temp = make_dataset(train_trace, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
-                                                            oversampling=oversampling,
-                                                            is_various_window=is_various_window,
                                                             is_remove_dupe=is_remove_dupe)
-        x_test_list, y_test_list = make_dataset('test', test_trace, file_indexes, category_indexes,
+        x_test_list, y_test_list = make_dataset(test_trace, file_indexes, category_indexes,
                                                 window_size=window_size, step=n_step, lookup=n_lookup,
                                                 is_remove_dupe=is_remove_dupe)
         x_train_list += x_train_list_temp
@@ -227,11 +213,6 @@ def run():
         if x_train_list and x_test_list:
             x_train = np.array(x_train_list)
             x_test = np.array(x_test_list)
-
-            # zero-padding for various window
-            if is_various_window:
-                x_train = sequence.pad_sequences(x_train_list, maxlen=window_size)
-                # x_test = sequence.pad_sequences(x_test_list, maxlen=window_size)
 
             # create a model
             model = create_model(num_files, num_categories)
