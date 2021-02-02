@@ -9,34 +9,6 @@ def test_answer001():
          "--epochs",  "500", "--threshold", "0.91", "--remove_dupe"])
     assert args.project == "MDT"
 
-def test_answer002():
-    parser = add_argments2parser()
-    args = parser.parse_args(
-        ["--project", "MDT", "--window_size", "3", "--step", "10", "--lookup", "1000", "--batch_size", "32",
-         "--epochs",  "500", "--threshold", "0.91", "--remove_dupe"])
-    assert args.various_window == False
-
-def test_answer003():
-    parser = add_argments2parser()
-    args = parser.parse_args(
-        ["--project", "MDT", "--window_size", "3", "--step", "10", "--lookup", "1000", "--batch_size", "32",
-         "--epochs",  "500", "--threshold", "0.91", "--remove_dupe"])
-    assert args.flexible_train == False
-
-def test_answer004():
-    parser = add_argments2parser()
-    args = parser.parse_args(
-        ["--project", "MDT", "--window_size", "3", "--step", "10", "--lookup", "1000", "--batch_size", "32",
-         "--epochs",  "500", "--threshold", "0.91", "--remove_dupe"])
-    assert args.flexible_test == False
-
-def test_answer005():
-    parser = add_argments2parser()
-    args = parser.parse_args(
-        ["--project", "MDT", "--window_size", "3", "--step", "10", "--lookup", "1000", "--batch_size", "32",
-         "--epochs",  "500", "--threshold", "0.91", "--remove_dupe"])
-    assert args.oversampling == 0
-
 def test_answer006():
     parser = add_argments2parser()
     args = parser.parse_args(

@@ -3,7 +3,7 @@ import argparse
 from time import time
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Embedding, LSTM
+from tensorflow.keras.layers import Embedding, LSTM, GRU
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras import backend as K # added by saleese, Oct. 07, 2020
@@ -53,10 +53,11 @@ def create_model(num_files, num_categories):
                         embeddings_initializer='random_uniform',
                         mask_zero=True,
                         input_length=window_size))
+    model.add(GRU(num_categories))
+    # model.add(LSTM(num_categories, activation='sigmoid'))
+    # model.add(LSTM(num_categories, dropout=lstm_dropout, activation='sigmoid'))
     # model.add(LSTM(lstm_memory_cells, return_sequences=True, dropout=lstm_dropout))
     # model.add(LSTM(lstm_memory_cells, dropout=lstm_dropout))
-    model.add(LSTM(num_categories, activation='sigmoid'))
-    # model.add(LSTM(num_categories, dropout=lstm_dropout, activation='sigmoid'))
     # model.add(Dense(num_categories, activation='sigmoid'))
     # model.add(Dense(num_categories, activation='softmax'))
     # print(model.summary())
@@ -164,8 +165,8 @@ def run():
     # to calculate precision and recall of a whole project
     precision_list, recall_list = [], []
 
-    print('the number of files is', num_files)
-    print('the number of categories is', num_categories)
+    print('the number of files is', num_files) # 4082 for MDT, 1617 for ECF, 1961 for PDE, 6091 for Platform, 14195 for Mylyn
+    print('the number of categories is', num_categories) # 114 for MDT, 150 for ECF, 351 for PDE, 786 for Platform, 2315 for Mylyn
 
     is_init = True
     y_train = None
@@ -191,9 +192,11 @@ def run():
 
     # online learning
     for iteration in range(start_trace_num, iterations):
+
         # get each trace for training and test, respectively
         train_trace = interaction_traces.interaction_trace_set[iteration-1]
         test_trace = interaction_traces.interaction_trace_set[iteration]
+
         # load dataset
         x_train_list_temp, y_train_list_temp = make_dataset(train_trace, file_indexes, category_indexes,
                                                             window_size=window_size, step=n_step, lookup=n_lookup,
@@ -256,6 +259,12 @@ def run():
                     print('   Recommendations:', recommendations)
                     print('   Answer Set:', answer_set)
                     print('   P: {0:.4f}, R: {1:.4f}'.format(precision, recall))
+
+                    # the code block removing the remaining part when the first edit turns out to be false.
+                    if (precision == 0.0) and (recall == 0.0):
+                        recommend_set.clear()
+                        answer_set.clear()
+                        break
 
                 recommend_set.clear()
                 answer_set.clear()

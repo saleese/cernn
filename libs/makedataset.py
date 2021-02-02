@@ -46,21 +46,17 @@ if __name__ == '__main__':
     from libs.interaction_traces import InteractionTraces
 
     # directory of interaction traces
-    directory_name = 'dataset/Project_ECF/'
+    directory_name = '../dataset/Project_ECF/'
     interaction_trace_set = InteractionTraces(directory_name)
-
-    # file index
-    idx = integer_encode_without_zero_index(interaction_trace_set.event_set)
-    # print(idx)
-    category = integer_encode(interaction_trace_set.edit_set)
-    # print(category)
-    num_category = len(interaction_trace_set.edit_set)
-
     trace = interaction_trace_set.interaction_trace_set[1]
-    # print(trace.event_edit_tuple_list)
+    file_indexes = integer_encode_without_zero_index(interaction_trace_set.event_set)
+    category_indexes = integer_encode(interaction_trace_set.edit_set)
 
-    x_train, y_train = make_dataset(trace, idx, category, window_size=4, step=5, lookup=30, is_remove_dupe=False)
-    x_test, y_test = make_dataset(trace, idx, category, window_size=4, step=5, lookup=30, is_remove_dupe=False)
+    x_train, y_train = make_dataset(trace, file_indexes, category_indexes, window_size=4, step=5, lookup=30, is_remove_dupe=False)
+    x_test, y_test = make_dataset(trace, file_indexes, category_indexes, window_size=4, step=5, lookup=30, is_remove_dupe=False)
+
+    print("x_train")
+    print(x_train)
 
     x_train = np.array(x_train)
     x_train = sequence.pad_sequences(x_train, maxlen=4)
@@ -68,10 +64,13 @@ if __name__ == '__main__':
     # y_train = [np.array(x) for x in y_train]
     # y_train = [to_categorical(x, num_category) for x in y_train]
     # y_train = np.array([x.sum(axis=0) for x in y_train])
-
+    print("x_train")
     print(x_train)
+    print("y_train")
     print(y_train)
+    print("x_test")
     print(x_test)
+    print("y_test")
     print(y_test)
 
     # print(x_train.shape)
