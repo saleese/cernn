@@ -53,8 +53,8 @@ def create_model(num_files, num_categories):
                         embeddings_initializer='random_uniform',
                         mask_zero=True,
                         input_length=window_size))
-    model.add(GRU(num_categories))
-    # model.add(LSTM(num_categories, activation='sigmoid'))
+    # model.add(GRU(num_categories))
+    model.add(LSTM(num_categories, activation='sigmoid'))
     # model.add(LSTM(num_categories, dropout=lstm_dropout, activation='sigmoid'))
     # model.add(LSTM(lstm_memory_cells, return_sequences=True, dropout=lstm_dropout))
     # model.add(LSTM(lstm_memory_cells, dropout=lstm_dropout))
